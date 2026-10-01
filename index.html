@@ -1,0 +1,2647 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algebraická kalkulačka pro 9. třídu | Úprava výrazů, zlomky, procenta a rovnice</title>
+  <style>
+    :root {
+      /* Theme: Deep Black & Clean White with Vibrant Electric Orange */
+      --bg-dark: #090a0f;
+      --bg-dark-surface: #12141a;
+      --bg-dark-elevated: #1a1d26;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --card-hover-border: #fdba74;
+
+      /* High-contrast Text */
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #f8fafc;
+      --text-light-muted: #94a3b8;
+
+      /* Vibrant Orange Palette */
+      --orange: #ff6b00;
+      --orange-light: #f97316;
+      --orange-dark: #ea580c;
+      --orange-glow: rgba(255, 107, 0, 0.4);
+      --orange-bg-subtle: #fff7ed;
+      --orange-border-subtle: #fed7aa;
+
+      /* Auxiliary States */
+      --success: #059669;
+      --success-bg: #ecfdf5;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+
+      /* Radius & Shadows */
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.18);
+      --shadow-orange: 0 4px 14px var(--orange-glow);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(255, 107, 0, 0.14) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(249, 115, 22, 0.08) 0%, transparent 50%);
+      color: var(--text-light);
+      line-height: 1.6;
+      padding: 24px 16px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-bottom: 12px;
+    }
+
+    .badge-grade {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 107, 0, 0.15);
+      color: #fb923c;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      letter-spacing: 0.03em;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    h1 span.accent-text {
+      color: var(--orange);
+      text-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+    }
+
+    .subtitle {
+      color: var(--text-light-muted);
+      font-size: 1.05rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Main App Layout: 2 Columns (Content + History Sidebar) */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Crisp White Cards on Dark Background */
+    .card {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-card);
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--card-hover-border);
+    }
+
+    /* Input Section */
+    .input-label {
+      display: block;
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .math-input {
+      width: 100%;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 1.35rem;
+      font-weight: 600;
+      padding: 14px 44px 14px 18px;
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: all 0.2s;
+      background: #fafafa;
+      color: #0f172a;
+    }
+
+    .math-input:focus {
+      border-color: var(--orange);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.18);
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 12px;
+      background: #e2e8f0;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #475569;
+      font-size: 14px;
+      transition: all 0.15s;
+    }
+
+    .clear-btn:hover {
+      background: #cbd5e1;
+      color: #0f172a;
+    }
+
+    /* Virtual Keypad */
+    .keypad {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .key-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Consolas', monospace;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .key-btn:hover {
+      background: var(--orange-bg-subtle);
+      border-color: var(--orange);
+      color: var(--orange-dark);
+      transform: translateY(-1px);
+    }
+
+    .key-btn:active {
+      transform: translateY(0);
+    }
+
+    .key-op {
+      background: var(--orange-bg-subtle);
+      border-color: var(--orange-border-subtle);
+      color: var(--orange-dark);
+      font-weight: 700;
+    }
+
+    .key-special {
+      background: #e0f2fe;
+      border-color: #bae6fd;
+      color: #0369a1;
+      font-weight: 700;
+    }
+
+    /* Actions Bar */
+    .actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 12px 22px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dark) 100%);
+      color: #ffffff;
+      box-shadow: var(--shadow-orange);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #ff7a1a 0%, var(--orange) 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(255, 107, 0, 0.5);
+    }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: #ffffff;
+      border-color: var(--orange-border-subtle);
+      color: var(--orange-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--orange-dark);
+      border: 1px dashed var(--orange);
+      font-size: 0.9rem;
+      padding: 8px 14px;
+    }
+
+    .btn-outline:hover {
+      background: var(--orange-bg-subtle);
+    }
+
+    /* Preset Chips */
+    .presets-container {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--card-border);
+    }
+
+    .presets-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .presets-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preset-chip {
+      background: #f8fafc;
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      padding: 5px 12px;
+      font-size: 0.85rem;
+      font-family: 'Consolas', monospace;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .preset-chip:hover {
+      background: var(--orange-bg-subtle);
+      border-color: var(--orange-border-subtle);
+      color: var(--orange-dark);
+      transform: translateY(-1px);
+    }
+
+    .chip-badge {
+      font-size: 0.72rem;
+      background: var(--orange);
+      color: white;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+      font-family: sans-serif;
+      font-weight: 700;
+    }
+
+    /* Practice Mode / Quiz Box */
+    .practice-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: var(--orange-bg-subtle);
+      border: 1px solid var(--orange-border-subtle);
+      display: none;
+    }
+
+    .practice-box.active {
+      display: block;
+    }
+
+    .practice-header {
+      font-weight: 700;
+      color: var(--orange-dark);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .practice-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .practice-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--orange-border-subtle);
+      border-radius: var(--radius-sm);
+      font-family: 'Consolas', monospace;
+      font-size: 1.1rem;
+      outline: none;
+    }
+
+    .practice-input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+    }
+
+    .practice-feedback {
+      margin-top: 10px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+
+    .practice-feedback.correct {
+      display: block;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+    }
+
+    .practice-feedback.incorrect {
+      display: block;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+    }
+
+    /* Solution Area */
+    #solution-area {
+      display: none;
+    }
+
+    .solution-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Final Result Highlight Card */
+    .result-card {
+      background: linear-gradient(135deg, #181920 0%, #0d0e12 100%);
+      color: white;
+      border-radius: var(--radius);
+      border: 2px solid var(--orange);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(255, 107, 0, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px var(--orange-glow);
+    }
+
+    .result-expression {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: #ff9d42;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      word-break: break-all;
+      text-shadow: 0 0 15px rgba(255, 107, 0, 0.35);
+    }
+
+    .result-alt {
+      font-size: 1rem;
+      color: var(--text-light-muted);
+      margin-top: 4px;
+    }
+
+    .result-alt strong {
+      color: #ffffff;
+    }
+
+    .copy-result-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .copy-result-btn:hover {
+      background: var(--orange);
+      border-color: var(--orange);
+      box-shadow: var(--shadow-orange);
+    }
+
+    /* Step Card */
+    .step-card {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-card);
+      transition: all 0.2s;
+    }
+
+    .step-card:hover {
+      border-color: var(--card-hover-border);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px var(--orange-glow);
+    }
+
+    .step-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .step-desc {
+      color: #475569;
+      font-size: 0.95rem;
+      margin-bottom: 14px;
+    }
+
+    /* Bracket boxes */
+    .bracket-box {
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+
+    .bracket-box.minus-rule {
+      background: #fff5f5;
+      border-color: #fecaca;
+    }
+
+    .bracket-box.plus-rule {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .bracket-box.mul-rule {
+      background: var(--orange-bg-subtle);
+      border-color: var(--orange-border-subtle);
+    }
+
+    .rule-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .rule-tag.tag-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    .rule-tag.tag-success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+    }
+
+    .rule-tag.tag-warning {
+      background: var(--orange-bg-subtle);
+      color: var(--orange-dark);
+      border: 1px solid var(--orange-border-subtle);
+    }
+
+    .bracket-expression-title {
+      font-family: 'Consolas', monospace;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .bracket-explanation {
+      font-size: 0.95rem;
+      color: #334155;
+      margin-bottom: 10px;
+    }
+
+    .term-transformation-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      background: white;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+
+    .term-transformation-table th,
+    .term-transformation-table td {
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .term-transformation-table th {
+      background: #f1f5f9;
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .term-old { font-family: 'Consolas', monospace; font-weight: 600; }
+    .term-new { font-family: 'Consolas', monospace; font-weight: 700; }
+    .sign-flipped { color: var(--danger); background: #fee2e2; padding: 2px 6px; border-radius: 4px; }
+    .sign-kept { color: var(--success); background: #dcfce7; padding: 2px 6px; border-radius: 4px; }
+
+    .math-display-box {
+      background: #f8fafc;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: 'Consolas', monospace;
+      font-size: 1.35rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .term-tag {
+      display: inline-block;
+      padding: 4px 8px;
+      margin: 2px;
+      border-radius: 6px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 0.15s;
+    }
+
+    .term-tag:hover { transform: scale(1.05); }
+
+    .color-x { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+    .color-x2 { background: #ede9fe; color: #6d28d9; border-color: #ddd6fe; }
+    .color-y { background: #fae8ff; color: #a21caf; border-color: #f5d0fe; }
+    .color-a { background: #ccfbf1; color: #0f766e; border-color: #99f6e4; }
+    .color-b { background: #ffe4e6; color: #be123c; border-color: #fecdd3; }
+    .color-c { background: var(--orange-bg-subtle); color: var(--orange-dark); border-color: var(--orange-border-subtle); }
+    .color-num { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+    .color-other { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .group-card {
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      background: #fafafa;
+    }
+
+    .group-header {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .group-calc {
+      font-family: 'Consolas', monospace;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 4px;
+    }
+
+    .group-res { color: var(--orange-dark); font-weight: 800; }
+
+    .rule-formula {
+      font-family: 'Consolas', monospace;
+      font-weight: 700;
+      background: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    /* ==========================================================================
+       History Sidebar (Right Column)
+       ========================================================================== */
+    .history-card {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-card);
+      padding: 20px;
+      position: sticky;
+      top: 20px;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .history-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-count-badge {
+      background: var(--orange);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+
+    .clear-history-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s;
+    }
+
+    .clear-history-btn:hover {
+      color: var(--danger);
+    }
+
+    .history-list {
+      max-height: 580px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+    }
+
+    .history-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    .history-list::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .history-item {
+      background: #f8fafc;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .history-item:hover {
+      background: var(--orange-bg-subtle);
+      border-color: var(--orange);
+      transform: translateX(-2px);
+      box-shadow: 0 2px 8px rgba(255, 107, 0, 0.15);
+    }
+
+    .history-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .history-type-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    .type-vyraz { background: #e0f2fe; color: #0369a1; }
+    .type-rovnice { background: #f3e8ff; color: #7e22ce; }
+    .type-procenta { background: var(--orange-bg-subtle); color: var(--orange-dark); }
+
+    .history-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .history-item-expr {
+      font-family: 'Consolas', monospace;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .history-item-res {
+      font-family: 'Consolas', monospace;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--orange-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .delete-item-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .history-item:hover .delete-item-btn {
+      opacity: 1;
+    }
+
+    .delete-item-btn:hover {
+      color: var(--danger);
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 30px 10px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Cheatsheet Accordion */
+    .cheatsheet-card {
+      background: #ffffff;
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      margin-top: 24px;
+      overflow: hidden;
+    }
+
+    .cheatsheet-toggle {
+      width: 100%;
+      background: #f8fafc;
+      border: none;
+      padding: 16px 20px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #334155;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.15s;
+    }
+
+    .cheatsheet-toggle:hover {
+      background: var(--orange-bg-subtle);
+      color: var(--orange-dark);
+    }
+
+    .cheatsheet-body {
+      padding: 20px;
+      display: none;
+      border-top: 1px solid var(--card-border);
+      background: #ffffff;
+    }
+
+    .cheatsheet-body.open {
+      display: block;
+    }
+
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .rule-item {
+      background: #f8fafc;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border-left: 4px solid var(--orange);
+    }
+
+    .rule-item h4 {
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: #0f172a;
+    }
+
+    .rule-item p {
+      font-size: 0.88rem;
+      color: #475569;
+    }
+
+    /* Print styling */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+        padding: 0;
+      }
+      .app-layout {
+        display: block !important;
+      }
+      .history-card, .keypad, .actions-bar, .presets-container, .cheatsheet-card, .copy-result-btn, .clear-btn {
+        display: none !important;
+      }
+      .card, .step-card, .result-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+      }
+      .result-card {
+        background: #f8fafc !important;
+        color: black !important;
+      }
+      .result-expression {
+        color: #0f172a !important;
+      }
+    }
+
+    /* Error alert */
+    .error-alert {
+      background: var(--danger-bg);
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .error-alert.visible {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <header>
+      <div class="badge-grade">🎓 Učivo 9. třídy ZŠ &amp; Přijímací zkoušky na SŠ</div>
+      <h1>Algebraická kalkulačka <span class="accent-text">výrazů a rovnic</span></h1>
+      <p class="subtitle">Odstraňování závorek, práce se zápornými znaménky, zlomky, procenta a lineární rovnice krok za krokem.</p>
+    </header>
+
+    <!-- App Layout: 2 Columns (Main Content + History Sidebar) -->
+    <div class="app-layout">
+      
+      <!-- LEFT: Main Calculator & Steps -->
+      <main class="main-content">
+        
+        <!-- Input Card -->
+        <div class="card">
+          <label class="input-label" for="exprInput">Zadej algebraický výraz nebo rovnici:</label>
+          
+          <div class="input-group">
+            <input 
+              type="text" 
+              id="exprInput" 
+              class="math-input" 
+              placeholder="např. 5 - (2x - 3) + (x + 4) nebo 1/2x + 3 = 2/3x - 1" 
+              value="5 - (2x - 3) + (x + 4)"
+              autocomplete="off"
+              spellcheck="false"
+            >
+            <button class="clear-btn" id="clearBtn" title="Vymazat pole">✕</button>
+          </div>
+
+          <!-- Quick Virtual Keypad -->
+          <div class="keypad">
+            <button class="key-btn key-op" data-insert="+">+</button>
+            <button class="key-btn key-op" data-insert="-">-</button>
+            <button class="key-btn key-special" data-insert="/">/ (zlomek)</button>
+            <button class="key-btn key-special" data-insert="%">%</button>
+            <button class="key-btn key-special" data-insert="=">= (rovnice)</button>
+            <button class="key-btn key-op" data-insert="(">(</button>
+            <button class="key-btn key-op" data-insert=")">)</button>
+            <button class="key-btn key-op" data-insert="*">·</button>
+            <button class="key-btn" data-insert="x">x</button>
+            <button class="key-btn" data-insert="y">y</button>
+            <button class="key-btn" data-insert="a">a</button>
+            <button class="key-btn" data-insert="b">b</button>
+            <button class="key-btn" data-insert=" z ">z</button>
+            <button class="key-btn" data-insert="^2">²</button>
+            <button class="key-btn" id="backspaceBtn">⌫ Smazat</button>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="actions-bar">
+            <button class="btn btn-primary" id="solveBtn">
+              <span>🚀 Spočítat a ukázat postup</span>
+            </button>
+            <button class="btn btn-secondary" id="randomBtn" title="Vygeneruje náhodný příklad">
+              <span>🎲 Náhodný příklad</span>
+            </button>
+            <button class="btn btn-outline" id="practiceToggleBtn">
+              <span>✏️ Otestuj se (Kvíz)</span>
+            </button>
+            <button class="btn btn-secondary" id="printCalcBtn" title="Vytisknout postup řešení">
+              <span>🖨️ Tisk</span>
+            </button>
+          </div>
+
+          <!-- Practice Mode / Quiz Box -->
+          <div class="practice-box" id="practiceBox">
+            <div class="practice-header">
+              <span>✏️ Otestuj se: Zkus nejdřív výsledek spočítat sám na papír!</span>
+            </div>
+            <p style="font-size:0.9rem; color:#9a3412;">Napiš svůj zjednodušený výsledek a zkontroluj si správnost:</p>
+            <div class="practice-input-row">
+              <input type="text" class="practice-input" id="practiceInput" placeholder="např. -x + 12 nebo x = 24">
+              <button class="btn btn-primary" id="checkPracticeBtn" style="padding:10px 18px;">Ověřit</button>
+            </div>
+            <div class="practice-feedback" id="practiceFeedback"></div>
+          </div>
+
+          <!-- Preset Example Chips -->
+          <div class="presets-container">
+            <div class="presets-title">Vyzkoušej typické příklady z 9. třídy:</div>
+            <div class="presets-list">
+              <button class="preset-chip" data-expr="5 - (2x - 3) + (x + 4)"><span class="chip-badge">Základ</span> 5 - (2x - 3) + (x + 4)</button>
+              <button class="preset-chip" data-expr="1/2x + 3/4x - 5"><span class="chip-badge">Zlomky</span> 1/2x + 3/4x - 5</button>
+              <button class="preset-chip" data-expr="5/6 - (2/3x - 1/4) + (1/2x + 1/3)"><span class="chip-badge">Zlomky+Závorky</span> 5/6 - (2/3x - 1/4) + (1/2x + 1/3)</button>
+              <button class="preset-chip" data-expr="15% z x + 25"><span class="chip-badge">Procenta</span> 15% z x + 25</button>
+              <button class="preset-chip" data-expr="x + 20% - 10"><span class="chip-badge">Procentní změna</span> x + 20% - 10</button>
+              <button class="preset-chip" data-expr="1/2x + 3 = 2/3x - 1"><span class="chip-badge">Rovnice</span> 1/2x + 3 = 2/3x - 1</button>
+              <button class="preset-chip" data-expr="(2x - 1)/3 = (x + 4)/2"><span class="chip-badge">Rovnice se zlomky</span> (2x - 1)/3 = (x + 4)/2</button>
+              <button class="preset-chip" data-expr="x + 20% = 60"><span class="chip-badge">Rovnice %</span> x + 20% = 60</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Alert Box -->
+        <div class="error-alert" id="errorAlert">
+          <span style="font-size: 1.3rem;">⚠️</span>
+          <span id="errorMessage">Zadaný výraz obsahuje chybu.</span>
+        </div>
+
+        <!-- Solution Area -->
+        <div id="solution-area">
+          
+          <!-- Final Result Banner -->
+          <div class="result-card">
+            <span class="result-badge" id="resultTypeBadge">Konečný výsledek</span>
+            <div class="result-expression" id="finalResultText">-x + 12</div>
+            <div class="result-alt" id="finalAltText"></div>
+            <button class="copy-result-btn" id="copyResultBtn">
+              <span>📋 Kopírovat výsledek</span>
+            </button>
+          </div>
+
+          <div class="solution-title">
+            <span>📖 Podrobný postup řešení krok za krokem:</span>
+          </div>
+
+          <!-- Steps Container -->
+          <div id="stepsContainer"></div>
+
+        </div>
+
+        <!-- Cheatsheet & Rules Accordion -->
+        <div class="cheatsheet-card">
+          <button class="cheatsheet-toggle" id="cheatsheetToggle">
+            <span>💡 Pomůcka a pravidla pro 9. třídu (Znaménka, zlomky, procenta a rovnice)</span>
+            <span id="cheatsheetIcon">▼</span>
+          </button>
+          <div class="cheatsheet-body" id="cheatsheetBody">
+            <div class="rule-grid">
+              
+              <div class="rule-item" style="border-left-color: var(--danger);">
+                <h4>1. Mínus před závorkou</h4>
+                <p>Znaménko mínus před závorkou <strong>otočí všechna znaménka uvnitř závorky na opačná</strong>. Odpovídá to násobení číslem <span class="rule-formula">-1</span>.</p>
+                <div style="margin-top: 6px;">
+                  <span class="rule-formula">-(a + b) = -a - b</span><br>
+                  <span class="rule-formula">-(a - b) = -a + b</span>
+                </div>
+              </div>
+
+              <div class="rule-item" style="border-left-color: var(--orange);">
+                <h4>2. Zlomky v algebraických výrazech</h4>
+                <p>Při sčítání a odčítání zlomků převedeme členy na <strong>společného jmenovatele (nejmenší společný násobek)</strong>:</p>
+                <div style="margin-top: 6px;">
+                  <span class="rule-formula">1/2x + 1/3x = (3/6 + 2/6)x = 5/6x</span>
+                </div>
+              </div>
+
+              <div class="rule-item" style="border-left-color: var(--success);">
+                <h4>3. Procenta a zápis „z celku“</h4>
+                <p>Procenta vyjadřují setiny celku. Slovo <strong>„z“ znamená násobení</strong>:</p>
+                <div style="margin-top: 6px;">
+                  <span class="rule-formula">15% z x = (15/100)·x = 0,15x = 3/20x</span><br>
+                  <span class="rule-formula">x + 20% = x + 0,2x = 1,2x</span>
+                </div>
+              </div>
+
+              <div class="rule-item" style="border-left-color: #6366f1;">
+                <h4>4. Postup řešení lineární rovnice</h4>
+                <p>1. Odstranit zlomky (vynásobit společným jmenovatelem).<br>
+                   2. Roznásobit závorky.<br>
+                   3. Přenést neznámé doleva, čísla doprava.<br>
+                   4. Vydělit koeficientem u neznámé a provést zkoušku.</p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- RIGHT: History Sidebar -->
+      <aside class="sidebar">
+        <div class="history-card">
+          <div class="history-header">
+            <div class="history-title">
+              <span>🕒 Historie výpočtů</span>
+              <span class="history-count-badge" id="historyCount">0</span>
+            </div>
+            <button class="clear-history-btn" id="clearHistoryBtn" title="Vymazat celou historii výpočtů">
+              <span>🗑️ Vymazat historii</span>
+            </button>
+          </div>
+
+          <div class="history-list" id="historyList">
+            <div class="history-empty">
+              📭 Zatím žádné výpočty.<br>Zadej výraz nebo rovnici a klikni na <strong>Spočítat</strong>.
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+  </div>
+
+  <script>
+    /* ==========================================================================
+       Algebra Engine (Rational arithmetic, Term parser, Percentages, Equations)
+       ========================================================================== */
+
+    class Fraction {
+      constructor(num, den = 1) {
+        if (den === 0) throw new Error("Dělení nulou ve zlomku.");
+        let n = Math.round(num);
+        let d = Math.round(den);
+        if (d < 0) { n = -n; d = -d; }
+        const g = Fraction.gcd(Math.abs(n), Math.abs(d));
+        this.n = n / g;
+        this.d = d / g;
+      }
+
+      static gcd(a, b) {
+        while (b) { const t = b; b = a % b; a = t; }
+        return a || 1;
+      }
+
+      static lcm(a, b) {
+        if (a === 0 || b === 0) return 1;
+        return Math.abs(a * b) / Fraction.gcd(a, b);
+      }
+
+      static from(val) {
+        if (val instanceof Fraction) return val;
+        if (typeof val === 'number') {
+          if (Number.isInteger(val)) return new Fraction(val, 1);
+          const s = val.toString();
+          const dec = s.split('.')[1];
+          if (dec) {
+            const d = Math.pow(10, Math.min(dec.length, 4));
+            return new Fraction(Math.round(val * d), d);
+          }
+          return new Fraction(Math.round(val), 1);
+        }
+        if (typeof val === 'string') {
+          val = val.trim();
+          if (val.includes('/')) {
+            const parts = val.split('/');
+            return new Fraction(parseFloat(parts[0]), parseFloat(parts[1]));
+          }
+          const num = parseFloat(val);
+          if (isNaN(num)) return new Fraction(0, 1);
+          return Fraction.from(num);
+        }
+        return new Fraction(0, 1);
+      }
+
+      add(other) {
+        const o = Fraction.from(other);
+        return new Fraction(this.n * o.d + o.n * this.d, this.d * o.d);
+      }
+
+      sub(other) {
+        const o = Fraction.from(other);
+        return new Fraction(this.n * o.d - o.n * this.d, this.d * o.d);
+      }
+
+      mul(other) {
+        const o = Fraction.from(other);
+        return new Fraction(this.n * o.n, this.d * o.d);
+      }
+
+      div(other) {
+        const o = Fraction.from(other);
+        if (o.n === 0) throw new Error("Dělení nulou.");
+        return new Fraction(this.n * o.d, this.d * o.n);
+      }
+
+      isZero() { return this.n === 0; }
+      isOne() { return this.n === 1 && this.d === 1; }
+      isMinusOne() { return this.n === -1 && this.d === 1; }
+      isPositive() { return this.n > 0; }
+      isNegative() { return this.n < 0; }
+
+      toNumber() { return this.n / this.d; }
+
+      toString() {
+        if (this.d === 1) return `${this.n}`;
+        return `${this.n}/${this.d}`;
+      }
+
+      toCzechString() {
+        if (this.d === 1) return `${this.n}`;
+        const dec = (this.n / this.d);
+        if (Number.isFinite(dec) && (this.d === 2 || this.d === 4 || this.d === 5 || this.d === 10 || this.d === 20 || this.d === 25 || this.d === 50 || this.d === 100)) {
+          return `${this.n}/${this.d} (tj. ${dec.toString().replace('.', ',')})`;
+        }
+        return `${this.n}/${this.d}`;
+      }
+    }
+
+    class Term {
+      constructor(fractionCoeff, varPart = '') {
+        this.coeff = Fraction.from(fractionCoeff);
+        this.varPart = varPart.trim();
+      }
+
+      isConstant() { return this.varPart === ''; }
+      isZero() { return this.coeff.isZero(); }
+
+      clone() {
+        return new Term(new Fraction(this.coeff.n, this.coeff.d), this.varPart);
+      }
+
+      toSignedString(isFirst = false) {
+        if (this.isZero()) return isFirst ? '0' : '';
+        const isNeg = this.coeff.isNegative();
+        const absCoeff = new Fraction(Math.abs(this.coeff.n), this.coeff.d);
+
+        let signPart = '';
+        if (isFirst) {
+          signPart = isNeg ? '-' : '';
+        } else {
+          signPart = isNeg ? '- ' : '+ ';
+        }
+
+        let coeffPart = '';
+        if (this.isConstant()) {
+          coeffPart = absCoeff.toString();
+        } else {
+          if (absCoeff.isOne()) {
+            coeffPart = '';
+          } else {
+            coeffPart = absCoeff.toString();
+          }
+        }
+
+        let v = this.varPart.replace(/\^2/g, '²').replace(/\^3/g, '³');
+        return `${signPart}${coeffPart}${v}`.trim();
+      }
+
+      toBadgeHtml(isFirst = false) {
+        let colorClass = 'color-other';
+        const vp = this.varPart;
+        if (vp === '') colorClass = 'color-num';
+        else if (vp === 'x') colorClass = 'color-x';
+        else if (vp === 'x^2' || vp === 'x²') colorClass = 'color-x2';
+        else if (vp === 'y') colorClass = 'color-y';
+        else if (vp === 'a') colorClass = 'color-a';
+        else if (vp === 'b') colorClass = 'color-b';
+        else if (vp === 'c') colorClass = 'color-c';
+
+        return `<span class="term-tag ${colorClass}">${this.toSignedString(isFirst)}</span>`;
+      }
+    }
+
+    function preprocessMathString(expr) {
+      if (!expr) return '';
+      let s = expr
+        .replace(/[\u2010\u2011\u2012\u2013\u2014\u2212]/g, '-')
+        .replace(/[·×]/g, '*')
+        .replace(/,/g, '.')
+        .replace(/[\[\{]/g, '(')
+        .replace(/[\]\}]/g, ')')
+        .replace(/²/g, '^2')
+        .replace(/³/g, '^3')
+        .trim();
+
+      const percentConversions = [];
+
+      s = s.replace(/(\d+(?:\.\d+)?)\s*%\s*(?:z|of|\*)\s*(\([^\)]+\)|[a-zA-Z0-9]+(?:\^[0-9]+)?)/gi, (match, p, target) => {
+        const frac = Fraction.from(p).div(100);
+        percentConversions.push({
+          original: match,
+          conversion: `${p}% z ${target} = (${p}/100) · ${target} = ${frac.toString()}${target.startsWith('(') ? '' : target}`
+        });
+        return `(${p}/100)*${target}`;
+      });
+
+      s = s.replace(/([a-zA-Z])\s*([+-])\s*(\d+(?:\.\d+)?)\s*%(?!\s*(?:z|of|\*))/gi, (match, v, sign, p) => {
+        const frac = Fraction.from(p).div(100);
+        percentConversions.push({
+          original: match,
+          conversion: `${v} ${sign} ${p}% = ${v} ${sign} (${p}/100)·${v} = ${v} ${sign} ${frac.toString()}${v}`
+        });
+        return `${v} ${sign} (${p}/100)*${v}`;
+      });
+
+      s = s.replace(/(\d+(?:\.\d+)?)\s*%/g, (match, p) => {
+        const frac = Fraction.from(p).div(100);
+        percentConversions.push({
+          original: match,
+          conversion: `${p}% = ${frac.toString()}`
+        });
+        return `(${p}/100)`;
+      });
+
+      s = s.replace(/(\([^\)]+\))\s*\/\s*(\d+)/g, (match, bracket, den) => {
+        return `(1/${den})*${bracket}`;
+      });
+
+      s = s.replace(/(\d*)\s*([a-zA-Z])\s*\/\s*(\d+)/g, (match, num, v, den) => {
+        const n = num === '' ? '1' : num;
+        return `${n}/${den}${v}`;
+      });
+
+      return {
+        cleaned: s,
+        percentConversions: percentConversions
+      };
+    }
+
+    function parseSingleTerm(rawStr) {
+      let s = rawStr.trim();
+      let sign = 1;
+      if (s.startsWith('+')) {
+        sign = 1;
+        s = s.substring(1).trim();
+      } else if (s.startsWith('-')) {
+        sign = -1;
+        s = s.substring(1).trim();
+      }
+
+      const match = s.match(/[a-zA-Z]/);
+      if (!match) {
+        const num = s === '' ? 1 : Fraction.from(s);
+        return new Term(num.mul(sign), '');
+      }
+
+      const splitIdx = match.index;
+      const numPartStr = s.substring(0, splitIdx).trim();
+      const varPartStr = s.substring(splitIdx).trim();
+
+      let num;
+      if (numPartStr === '' || numPartStr === '+') {
+        num = new Fraction(1, 1);
+      } else if (numPartStr === '-') {
+        num = new Fraction(-1, 1);
+      } else if (numPartStr.endsWith('*')) {
+        num = Fraction.from(numPartStr.slice(0, -1));
+      } else {
+        num = Fraction.from(numPartStr);
+      }
+
+      return new Term(num.mul(sign), varPartStr);
+    }
+
+    function splitStringIntoTerms(str) {
+      const rawTerms = [];
+      let current = '';
+      let depth = 0;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str[i];
+        if (ch === '(') depth++;
+        else if (ch === ')') depth--;
+
+        if (depth === 0 && (ch === '+' || ch === '-') && i > 0 && current.trim().length > 0) {
+          const lastNonSpace = current.trim().slice(-1);
+          if (lastNonSpace !== '*' && lastNonSpace !== '/' && lastNonSpace !== '^') {
+            rawTerms.push(current.trim());
+            current = ch;
+            continue;
+          }
+        }
+        current += ch;
+      }
+      if (current.trim().length > 0) {
+        rawTerms.push(current.trim());
+      }
+      return rawTerms.map(t => parseSingleTerm(t));
+    }
+
+    function hasNestedBrackets(str) {
+      let depth = 0;
+      for (let ch of str) {
+        if (ch === '(') {
+          depth++;
+          if (depth > 1) return true;
+        } else if (ch === ')') {
+          depth--;
+        }
+      }
+      return false;
+    }
+
+    function resolveInnermostBracket(expr) {
+      let openIdx = -1;
+      let closeIdx = -1;
+      for (let i = 0; i < expr.length; i++) {
+        if (expr[i] === '(') {
+          openIdx = i;
+        } else if (expr[i] === ')' && openIdx !== -1) {
+          closeIdx = i;
+          break;
+        }
+      }
+      if (openIdx === -1 || closeIdx === -1) return null;
+
+      const innerContent = expr.substring(openIdx + 1, closeIdx);
+
+      let p = openIdx - 1;
+      while (p >= 0 && /\s/.test(expr[p])) p--;
+
+      let hasMul = false;
+      if (p >= 0 && (expr[p] === '*' || expr[p] === '·')) {
+        hasMul = true;
+        p--;
+        while (p >= 0 && /\s/.test(expr[p])) p--;
+      }
+
+      let numEnd = p;
+      while (p >= 0 && /[0-9.\/]/.test(expr[p])) p--;
+      let numStr = (p < numEnd) ? expr.substring(p + 1, numEnd + 1) : '';
+
+      while (p >= 0 && /\s/.test(expr[p])) p--;
+
+      let signStr = '';
+      while (p >= 0 && (expr[p] === '+' || expr[p] === '-')) {
+        signStr = expr[p] + signStr;
+        p--;
+      }
+      let segmentStart = (signStr !== '' ? p + 1 : (numStr !== '' ? numEnd - numStr.length + 1 : openIdx));
+
+      let sign = 1;
+      for (let ch of signStr) {
+        if (ch === '-') sign = -sign;
+      }
+      let factorNum = numStr ? Fraction.from(numStr) : new Fraction(1, 1);
+      let multiplier = factorNum.mul(sign);
+
+      return {
+        segmentStart: segmentStart,
+        segmentEnd: closeIdx + 1,
+        rawBracketExpr: expr.substring(segmentStart, closeIdx + 1),
+        multiplier: multiplier,
+        innerContent: innerContent
+      };
+    }
+
+    function solveExpression(rawInput, preprocInfo) {
+      let cleaned = preprocInfo ? preprocInfo.cleaned : preprocessMathString(rawInput).cleaned;
+      if (!cleaned) throw new Error("Prosím zadejte algebraický výraz.");
+
+      let bCount = 0;
+      for (let ch of cleaned) {
+        if (ch === '(') bCount++;
+        if (ch === ')') bCount--;
+        if (bCount < 0) throw new Error("Chybná závorka: uzavírací ')' před otevírací '('. Zkontrolujte výraz.");
+      }
+      if (bCount !== 0) throw new Error("Chyba v závorkách: počet otevíracích '(' a uzavíracích ')' se neshoduje.");
+
+      const nestedSteps = [];
+      let currentExpr = cleaned;
+
+      while (hasNestedBrackets(currentExpr)) {
+        const innerInfo = resolveInnermostBracket(currentExpr);
+        if (!innerInfo) break;
+
+        const innerTerms = splitStringIntoTerms(innerInfo.innerContent);
+        const expandedTerms = [];
+        for (const t of innerTerms) {
+          expandedTerms.push(new Term(t.coeff.mul(innerInfo.multiplier), t.varPart));
+        }
+
+        let replacement = '';
+        expandedTerms.forEach((t, idx) => {
+          const s = t.toSignedString(idx === 0);
+          replacement += (idx === 0 ? s : ' ' + s);
+        });
+
+        if (innerInfo.segmentStart > 0 && !replacement.startsWith('+') && !replacement.startsWith('-')) {
+          replacement = '+ ' + replacement;
+        }
+
+        currentExpr = currentExpr.substring(0, innerInfo.segmentStart) + ' ' + replacement + ' ' + currentExpr.substring(innerInfo.segmentEnd);
+        currentExpr = currentExpr.replace(/\s+/g, ' ').trim();
+
+        nestedSteps.push({
+          rawBracket: innerInfo.rawBracketExpr,
+          inner: innerInfo.innerContent,
+          multiplier: innerInfo.multiplier,
+          expanded: replacement,
+          newExpr: currentExpr
+        });
+      }
+
+      const segments = [];
+      let i = 0;
+      const len = currentExpr.length;
+
+      while (i < len) {
+        while (i < len && /\s/.test(currentExpr[i])) i++;
+        if (i >= len) break;
+
+        let netSign = 1;
+        let hasExplicitSign = false;
+        let signStart = i;
+        while (i < len && (currentExpr[i] === '+' || currentExpr[i] === '-' || /\s/.test(currentExpr[i]))) {
+          if (currentExpr[i] === '-') {
+            netSign = -netSign;
+            hasExplicitSign = true;
+          } else if (currentExpr[i] === '+') {
+            hasExplicitSign = true;
+          }
+          i++;
+        }
+
+        while (i < len && /\s/.test(currentExpr[i])) i++;
+        if (i >= len) break;
+
+        let numStr = '';
+        while (i < len && /[0-9.\/]/.test(currentExpr[i])) {
+          numStr += currentExpr[i];
+          i++;
+        }
+
+        while (i < len && /\s/.test(currentExpr[i])) i++;
+
+        let hasMul = false;
+        if (i < len && (currentExpr[i] === '*' || currentExpr[i] === '·')) {
+          hasMul = true;
+          i++;
+          while (i < len && /\s/.test(currentExpr[i])) i++;
+        }
+
+        if (i < len && currentExpr[i] === '(') {
+          let factor = Fraction.from(numStr ? numStr : 1);
+          if (netSign === -1) factor = factor.mul(-1);
+
+          let depth = 1;
+          let insideStart = i + 1;
+          i++;
+          while (i < len && depth > 0) {
+            if (currentExpr[i] === '(') depth++;
+            else if (currentExpr[i] === ')') depth--;
+            if (depth === 0) break;
+            i++;
+          }
+          let insideContent = currentExpr.slice(insideStart, i);
+          i++;
+
+          segments.push({
+            type: 'bracket',
+            multiplier: factor,
+            hasExplicitSign: hasExplicitSign,
+            netSign: netSign,
+            hasFactorNum: Boolean(numStr),
+            rawFactorNum: numStr ? Fraction.from(numStr) : null,
+            insideContent: insideContent,
+            rawString: currentExpr.slice(signStart, i).trim()
+          });
+        } else {
+          let termBody = numStr;
+          while (i < len) {
+            if (currentExpr[i] === '+' || currentExpr[i] === '-') break;
+            if (currentExpr[i] === '(') break;
+            termBody += currentExpr[i];
+            i++;
+          }
+          termBody = termBody.trim();
+          if (termBody) {
+            const fullTermStr = (netSign === -1 ? '-' : '+') + termBody;
+            const termObj = parseSingleTerm(fullTermStr);
+            segments.push({
+              type: 'term',
+              term: termObj,
+              rawString: currentExpr.slice(signStart, i).trim()
+            });
+          }
+        }
+      }
+
+      const bracketSteps = [];
+      const flatTerms = [];
+
+      for (const seg of segments) {
+        if (seg.type === 'term') {
+          flatTerms.push(seg.term);
+        } else if (seg.type === 'bracket') {
+          const innerTerms = splitStringIntoTerms(seg.insideContent);
+          const expandedTerms = [];
+          const termTransforms = [];
+
+          for (const t of innerTerms) {
+            const newCoeff = t.coeff.mul(seg.multiplier);
+            const newTerm = new Term(newCoeff, t.varPart);
+            expandedTerms.push(newTerm);
+
+            termTransforms.push({
+              original: t,
+              result: newTerm
+            });
+          }
+
+          bracketSteps.push({
+            segment: seg,
+            innerTerms: innerTerms,
+            transforms: termTransforms,
+            resultTerms: expandedTerms
+          });
+
+          flatTerms.push(...expandedTerms);
+        }
+      }
+
+      let flatExpressionStr = '';
+      flatTerms.forEach((t, idx) => {
+        const s = t.toSignedString(idx === 0);
+        flatExpressionStr += (idx === 0 ? s : ' ' + s);
+      });
+
+      const groups = {};
+      for (const t of flatTerms) {
+        const key = t.varPart;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(t);
+      }
+
+      const simplifiedTerms = [];
+      const groupCalculations = [];
+
+      const sortedKeys = Object.keys(groups).sort((a, b) => {
+        if (a === '' && b !== '') return 1;
+        if (a !== '' && b === '') return -1;
+        const aPow = a.includes('^') ? parseInt(a.split('^')[1]) : (a.includes('²') ? 2 : 1);
+        const bPow = b.includes('^') ? parseInt(b.split('^')[1]) : (b.includes('²') ? 2 : 1);
+        if (aPow !== bPow) return bPow - aPow;
+        return a.localeCompare(b);
+      });
+
+      for (const key of sortedKeys) {
+        const groupTerms = groups[key];
+        let sumCoeff = new Fraction(0, 1);
+        let commonDen = 1;
+        const hasFraction = groupTerms.some(t => t.coeff.d !== 1);
+
+        for (const t of groupTerms) {
+          commonDen = Fraction.lcm(commonDen, t.coeff.d);
+          sumCoeff = sumCoeff.add(t.coeff);
+        }
+
+        groupCalculations.push({
+          varPart: key,
+          terms: groupTerms,
+          sumCoeff: sumCoeff,
+          hasFraction: hasFraction,
+          commonDen: commonDen
+        });
+
+        if (!sumCoeff.isZero()) {
+          simplifiedTerms.push(new Term(sumCoeff, key));
+        }
+      }
+
+      let finalResultStr = '';
+      if (simplifiedTerms.length === 0) {
+        finalResultStr = '0';
+      } else {
+        simplifiedTerms.forEach((t, idx) => {
+          const s = t.toSignedString(idx === 0);
+          finalResultStr += (idx === 0 ? s : ' ' + s);
+        });
+      }
+
+      let altResultStr = null;
+      if (simplifiedTerms.length === 2) {
+        const t0 = simplifiedTerms[0];
+        const t1 = simplifiedTerms[1];
+        if (t0.coeff.isNegative() && t1.coeff.isPositive() && t1.isConstant()) {
+          const absT0 = new Term(new Fraction(Math.abs(t0.coeff.n), t0.coeff.d), t0.varPart);
+          altResultStr = `${t1.toSignedString(true)} - ${absT0.toSignedString(true)}`;
+        }
+      }
+
+      return {
+        isEquation: false,
+        original: rawInput,
+        cleaned: cleaned,
+        percentConversions: preprocInfo ? preprocInfo.percentConversions : [],
+        nestedSteps: nestedSteps,
+        segments: segments,
+        bracketSteps: bracketSteps,
+        flatTerms: flatTerms,
+        flatExpression: flatExpressionStr,
+        groups: groupCalculations,
+        simplifiedTerms: simplifiedTerms,
+        finalResult: finalResultStr,
+        altResult: altResultStr
+      };
+    }
+
+    function solveEquation(rawInput, preprocInfo) {
+      let cleaned = preprocInfo.cleaned;
+      const parts = cleaned.split('=');
+      if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
+        throw new Error("Neplatný tvar rovnice. Zadej rovnici s právě jedním rovnítkem '=', např. 2x - 3 = x + 5.");
+      }
+
+      const leftSideRaw = parts[0].trim();
+      const rightSideRaw = parts[1].trim();
+
+      const leftSol = solveExpression(leftSideRaw);
+      const rightSol = solveExpression(rightSideRaw);
+
+      let overallLcm = 1;
+      [...leftSol.flatTerms, ...rightSol.flatTerms].forEach(t => {
+        overallLcm = Fraction.lcm(overallLcm, t.coeff.d);
+      });
+
+      const diffSol = solveExpression(`(${leftSideRaw}) - (${rightSideRaw})`);
+
+      let varTerm = diffSol.simplifiedTerms.find(t => !t.isConstant());
+      let constTerm = diffSol.simplifiedTerms.find(t => t.isConstant());
+
+      const varPart = varTerm ? varTerm.varPart : 'x';
+      const coeffA = varTerm ? varTerm.coeff : new Fraction(0, 1);
+      const coeffB = constTerm ? constTerm.coeff.mul(-1) : new Fraction(0, 1);
+
+      let root = null;
+      let rootType = 'unique';
+      let finalResultStr = '';
+
+      if (coeffA.isZero()) {
+        if (coeffB.isZero()) {
+          rootType = 'infinite';
+          finalResultStr = 'Nekonečně mnoho řešení (x ∈ R)';
+        } else {
+          rootType = 'none';
+          finalResultStr = 'Rovnice nemá žádné řešení (nelze splnit 0x = ' + coeffB.toString() + ')';
+        }
+      } else {
+        root = coeffB.div(coeffA);
+        finalResultStr = `${varPart} = ${root.toString()}`;
+        if (root.d !== 1) {
+          const dec = (root.n / root.d);
+          if (Number.isFinite(dec) && (root.d === 2 || root.d === 4 || root.d === 5 || root.d === 10 || root.d === 20 || root.d === 25 || root.d === 50 || root.d === 100)) {
+            finalResultStr += ` (tj. ${dec.toString().replace('.', ',')})`;
+          }
+        }
+      }
+
+      let verification = null;
+      if (root !== null) {
+        let leftVal = new Fraction(0, 1);
+        leftSol.simplifiedTerms.forEach(t => {
+          if (t.isConstant()) leftVal = leftVal.add(t.coeff);
+          else leftVal = leftVal.add(t.coeff.mul(root));
+        });
+
+        let rightVal = new Fraction(0, 1);
+        rightSol.simplifiedTerms.forEach(t => {
+          if (t.isConstant()) rightVal = rightVal.add(t.coeff);
+          else rightVal = rightVal.add(t.coeff.mul(root));
+        });
+
+        verification = {
+          leftValue: leftVal.toCzechString(),
+          rightValue: rightVal.toCzechString(),
+          isMatch: leftVal.n === rightVal.n && leftVal.d === rightVal.d
+        };
+      }
+
+      return {
+        isEquation: true,
+        original: rawInput,
+        cleaned: cleaned,
+        percentConversions: preprocInfo.percentConversions,
+        leftSideRaw: leftSideRaw,
+        rightSideRaw: rightSideRaw,
+        leftSol: leftSol,
+        rightSol: rightSol,
+        overallLcm: overallLcm,
+        coeffA: coeffA,
+        coeffB: coeffB,
+        varPart: varPart,
+        root: root,
+        rootType: rootType,
+        verification: verification,
+        finalResult: finalResultStr,
+        altResult: null
+      };
+    }
+
+    function solveGeneral(rawInput) {
+      const preprocInfo = preprocessMathString(rawInput);
+      if (preprocInfo.cleaned.includes('=')) {
+        return solveEquation(rawInput, preprocInfo);
+      } else {
+        return solveExpression(rawInput, preprocInfo);
+      }
+    }
+
+    /* ==========================================================================
+       UI Controller & History (localStorage device-independent)
+       ========================================================================== */
+
+    const exprInput = document.getElementById('exprInput');
+    const solveBtn = document.getElementById('solveBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const backspaceBtn = document.getElementById('backspaceBtn');
+    const errorAlert = document.getElementById('errorAlert');
+    const errorMessage = document.getElementById('errorMessage');
+    const solutionArea = document.getElementById('solution-area');
+    const stepsContainer = document.getElementById('stepsContainer');
+    const finalResultText = document.getElementById('finalResultText');
+    const finalAltText = document.getElementById('finalAltText');
+    const resultTypeBadge = document.getElementById('resultTypeBadge');
+    const copyResultBtn = document.getElementById('copyResultBtn');
+    const printCalcBtn = document.getElementById('printCalcBtn');
+    const cheatsheetToggle = document.getElementById('cheatsheetToggle');
+    const cheatsheetBody = document.getElementById('cheatsheetBody');
+    const cheatsheetIcon = document.getElementById('cheatsheetIcon');
+    const practiceToggleBtn = document.getElementById('practiceToggleBtn');
+    const practiceBox = document.getElementById('practiceBox');
+    const practiceInput = document.getElementById('practiceInput');
+    const checkPracticeBtn = document.getElementById('checkPracticeBtn');
+    const practiceFeedback = document.getElementById('practiceFeedback');
+
+    const historyList = document.getElementById('historyList');
+    const historyCount = document.getElementById('historyCount');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+    let currentSolution = null;
+    let historyData = [];
+
+    // LocalStorage management: local for this browser/device only
+    function loadHistory() {
+      try {
+        const stored = localStorage.getItem('algebra_calc_local_history');
+        if (stored) {
+          historyData = JSON.parse(stored);
+        }
+      } catch(e) {
+        historyData = [];
+      }
+      renderHistory();
+    }
+
+    function saveHistory() {
+      try {
+        localStorage.setItem('algebra_calc_local_history', JSON.stringify(historyData));
+      } catch(e) {}
+      renderHistory();
+    }
+
+    function addHistoryItem(sol) {
+      let typeLabel = 'Výraz';
+      let typeClass = 'type-vyraz';
+
+      if (sol.isEquation) {
+        typeLabel = 'Rovnice';
+        typeClass = 'type-rovnice';
+      } else if (sol.original.includes('%')) {
+        typeLabel = 'Procenta';
+        typeClass = 'type-procenta';
+      }
+
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+      if (historyData.length > 0 && historyData[0].expr === sol.original) {
+        return;
+      }
+
+      historyData.unshift({
+        id: Date.now(),
+        expr: sol.original,
+        result: sol.finalResult,
+        type: typeLabel,
+        typeClass: typeClass,
+        time: timeStr
+      });
+
+      if (historyData.length > 30) {
+        historyData.pop();
+      }
+
+      saveHistory();
+    }
+
+    function renderHistory() {
+      historyCount.textContent = historyData.length;
+      if (historyData.length === 0) {
+        historyList.innerHTML = `
+          <div class="history-empty">
+            📭 Zatím žádné výpočty.<br>Zadej výraz nebo rovnici a klikni na <strong>Spočítat</strong>.
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      historyData.forEach(item => {
+        html += `
+          <div class="history-item" data-id="${item.id}" data-expr="${escapeHtml(item.expr)}">
+            <button class="delete-item-btn" title="Smazat tuto položku" onclick="deleteHistoryItem(event, ${item.id})">✕</button>
+            <div class="history-item-top">
+              <span class="history-type-tag ${item.typeClass}">${item.type}</span>
+              <span class="history-time">${item.time}</span>
+            </div>
+            <div class="history-item-expr" title="${escapeHtml(item.expr)}">${escapeHtml(item.expr)}</div>
+            <div class="history-item-res">➜ ${escapeHtml(item.result)}</div>
+          </div>
+        `;
+      });
+      historyList.innerHTML = html;
+
+      document.querySelectorAll('.history-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (e.target.classList.contains('delete-item-btn')) return;
+          const expr = el.getAttribute('data-expr');
+          exprInput.value = expr;
+          handleSolve();
+        });
+      });
+    }
+
+    window.deleteHistoryItem = function(e, id) {
+      e.stopPropagation();
+      historyData = historyData.filter(item => item.id !== id);
+      saveHistory();
+    };
+
+    clearHistoryBtn.addEventListener('click', () => {
+      if (historyData.length === 0) return;
+      if (confirm("Opravdu chceš vymazat celou historii výpočtů?")) {
+        historyData = [];
+        saveHistory();
+      }
+    });
+
+    function handleSolve() {
+      hideError();
+      const val = exprInput.value.trim();
+      if (!val) {
+        showError("Prosím napiš algebraický výraz nebo rovnici do pole.");
+        return;
+      }
+
+      try {
+        const solution = solveGeneral(val);
+        currentSolution = solution;
+        renderSolution(solution);
+        addHistoryItem(solution);
+        solutionArea.style.display = 'block';
+
+        practiceFeedback.className = 'practice-feedback';
+        practiceFeedback.style.display = 'none';
+
+        solutionArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (err) {
+        showError(err.message);
+        solutionArea.style.display = 'none';
+      }
+    }
+
+    function renderSolution(sol) {
+      if (sol.isEquation) {
+        renderEquationSolution(sol);
+      } else {
+        renderExpressionSolution(sol);
+      }
+    }
+
+    function renderExpressionSolution(sol) {
+      resultTypeBadge.textContent = "Konečný zjednodušený tvar výrazu";
+      finalResultText.textContent = sol.finalResult;
+      if (sol.altResult) {
+        finalAltText.innerHTML = `💡 Lze zapsat také jako: <strong>${sol.altResult}</strong> (obě varianty jsou správně!)`;
+        finalAltText.style.display = 'block';
+      } else {
+        finalAltText.style.display = 'none';
+      }
+
+      let stepCounter = 1;
+      let html = '';
+
+      if (sol.percentConversions && sol.percentConversions.length > 0) {
+        let conversionsListHtml = sol.percentConversions.map(c => `<li><strong>${escapeHtml(c.conversion)}</strong></li>`).join('');
+        html += `
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num">${stepCounter++}</div>
+              <div>
+                <div class="step-title">Přípravný krok: Převod procent na zlomky</div>
+                <div class="step-desc">Procento vyjadřuje setinu celku (% = /100). Slovo „z“ představuje násobení:</div>
+              </div>
+            </div>
+            <div style="background:var(--orange-bg-subtle); border:1px solid var(--orange-border-subtle); padding:12px 16px; border-radius:8px;">
+              <ul style="margin-left: 20px; line-height: 1.8;">
+                ${conversionsListHtml}
+              </ul>
+              <div style="margin-top:8px; font-size:0.9rem; color:#475569;">
+                Upravený výraz po převodu procent: <code>${escapeHtml(sol.cleaned)}</code>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (sol.nestedSteps && sol.nestedSteps.length > 0) {
+        for (const nStep of sol.nestedSteps) {
+          html += `
+            <div class="step-card">
+              <div class="step-header">
+                <div class="step-num">${stepCounter++}</div>
+                <div>
+                  <div class="step-title">Odstranění vnitřní závorky</div>
+                  <div class="step-desc">Pokud máme vnořené závorky (např. kulaté uvnitř hranatých), začínáme vždy od té nejvnitřnější.</div>
+                </div>
+              </div>
+              <div class="bracket-box minus-rule">
+                <div class="bracket-expression-title">Vnitřní závorka: ${escapeHtml(nStep.rawBracket)}</div>
+                <div class="bracket-explanation">
+                  Závorku roznásobíme nebo otočíme její znaménka: 
+                  <strong>${escapeHtml(nStep.rawBracket)}</strong> &longrightarrow; <strong>${escapeHtml(nStep.expanded)}</strong>
+                </div>
+                <div style="font-size:0.95rem; color:#1e293b;">
+                  Výraz po úpravě vnitřní závorky: <span class="rule-formula">${escapeHtml(nStep.newExpr)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      if (sol.bracketSteps.length > 0) {
+        let bracketBoxesHtml = '';
+
+        for (const bStep of sol.bracketSteps) {
+          const seg = bStep.segment;
+          const isMinus = seg.multiplier.isMinusOne();
+          const isPlus = seg.multiplier.isOne();
+
+          let ruleTagClass = 'tag-danger';
+          let ruleTagName = '⚠️ MÍNUS PŘED ZÁVORKOU';
+          let boxClass = 'minus-rule';
+          let explanationText = '';
+
+          if (isMinus) {
+            ruleTagClass = 'tag-danger';
+            ruleTagName = '⚠️ MÍNUS PŘED ZÁVORKOU';
+            boxClass = 'minus-rule';
+            explanationText = 'Před závorkou je znaménko <strong>mínus (−)</strong>. Znamená to, že <strong>všechna znaménka uvnitř závorky se otočí na opačná</strong> (odpovídá to násobení číslem −1).';
+          } else if (isPlus) {
+            ruleTagClass = 'tag-success';
+            ruleTagName = 'ℹ️ PLUS PŘED ZÁVORKOU';
+            boxClass = 'plus-rule';
+            explanationText = 'Před závorkou je znaménko <strong>plus (+)</strong>. Závorku můžeme jednoduše smazat a <strong>znaménka všech členů uvnitř zůstávají beze změny</strong>.';
+          } else {
+            ruleTagClass = 'tag-warning';
+            ruleTagName = '✖️ ROZNÁSOBENÍ ZÁVORKY KOEFICIENTEM';
+            boxClass = 'mul-rule';
+            explanationText = `Před závorkou je koeficient <strong>${seg.multiplier.toString()}</strong>. Roznásobíme závorku: <strong>každý člen uvnitř vynásobíme koeficientem ${seg.multiplier.toString()}</strong>.`;
+          }
+
+          let tableRowsHtml = '';
+          for (const tr of bStep.transforms) {
+            const oldStr = tr.original.toSignedString(false);
+            const newStr = tr.result.toSignedString(false);
+            const isFlipped = (tr.original.coeff.isPositive() && tr.result.coeff.isNegative()) ||
+                              (tr.original.coeff.isNegative() && tr.result.coeff.isPositive());
+
+            tableRowsHtml += `
+              <tr>
+                <td class="term-old">${escapeHtml(oldStr)}</td>
+                <td>&longrightarrow;</td>
+                <td class="term-new ${isFlipped ? 'sign-flipped' : 'sign-kept'}">${escapeHtml(newStr)}</td>
+                <td style="font-size:0.85rem; color:#64748b;">
+                  ${isMinus ? (isFlipped ? 'Znaménko se otočilo na opačné' : 'Znaménko upraveno') : (isPlus ? 'Znaménko zůstává stejné' : `Vynásobeno koeficientem ${seg.multiplier.toString()}`)}
+                </td>
+              </tr>
+            `;
+          }
+
+          bracketBoxesHtml += `
+            <div class="bracket-box ${boxClass}">
+              <div class="rule-tag ${ruleTagClass}">${ruleTagName}</div>
+              <div class="bracket-expression-title">Část výrazu: ${escapeHtml(seg.rawString)}</div>
+              <div class="bracket-explanation">${explanationText}</div>
+              <table class="term-transformation-table">
+                <thead>
+                  <tr>
+                    <th>Původní člen v závorce</th>
+                    <th></th>
+                    <th>Výsledný člen bez závorky</th>
+                    <th>Vysvětlení změny</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${tableRowsHtml}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
+        html += `
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num">${stepCounter++}</div>
+              <div>
+                <div class="step-title">Krok 1: Odstranění závorek a úprava znamének</div>
+                <div class="step-desc">Projdeme jednotlivé závorky a podle znaménka či zlomku před nimi určíme nové tvary členů.</div>
+              </div>
+            </div>
+            ${bracketBoxesHtml}
+          </div>
+        `;
+      }
+
+      let badgeTermsHtml = sol.flatTerms.map((t, idx) => t.toBadgeHtml(idx === 0)).join(' ');
+
+      html += `
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-num">${stepCounter++}</div>
+            <div>
+              <div class="step-title">Krok 2: Zápis celého výrazu bez závorek</div>
+              <div class="step-desc">Spojíme všechny členy dohromady. Každý jednočlen si nese své znaménko! Stejnou barvou jsou označeny členy se stejnou proměnnou:</div>
+            </div>
+          </div>
+          <div class="math-display-box">
+            ${badgeTermsHtml}
+          </div>
+          <div style="font-size:0.9rem; color:#64748b; text-align:center;">
+            (Zápis výrazu: <code>${escapeHtml(sol.flatExpression)}</code>)
+          </div>
+        </div>
+      `;
+
+      let groupsCardsHtml = '';
+      let rearrangedGroupStrings = [];
+
+      for (const g of sol.groups) {
+        const varLabel = g.varPart === '' ? 'Samotná čísla (prosté členy)' : `Členy s proměnnou: ${g.varPart.replace(/\^2/g, '²')}`;
+        const termsBadgeList = g.terms.map((t, i) => t.toBadgeHtml(i === 0)).join(' ');
+        
+        let fracNote = '';
+        if (g.hasFraction && g.terms.length > 1) {
+          fracNote = `<div style="font-size:0.85rem; color:#d97706; margin-top:4px;">Společný jmenovatel: <strong>${g.commonDen}</strong></div>`;
+        }
+
+        const coeffsList = g.terms.map(t => t.coeff.toString()).join(' + ').replace(/\+\s*-/g, '- ');
+        let calcStr = '';
+        if (g.varPart === '') {
+          calcStr = `${coeffsList} = <strong>${g.sumCoeff.toString()}</strong>`;
+        } else {
+          calcStr = `(${coeffsList})${g.varPart.replace(/\^2/g, '²')} = <strong>${new Term(g.sumCoeff, g.varPart).toSignedString(true)}</strong>`;
+        }
+
+        groupsCardsHtml += `
+          <div class="group-card">
+            <div class="group-header">
+              <span>${escapeHtml(varLabel)}</span>
+              <span class="group-res">${new Term(g.sumCoeff, g.varPart).toSignedString(true)}</span>
+            </div>
+            <div style="margin-bottom:8px;">${termsBadgeList}</div>
+            <div class="group-calc">${calcStr}</div>
+            ${fracNote}
+          </div>
+        `;
+
+        const groupTermsStr = g.terms.map((t, i) => t.toSignedString(i === 0)).join(' ');
+        rearrangedGroupStrings.push(`(${groupTermsStr})`);
+      }
+
+      html += `
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-num">${stepCounter++}</div>
+            <div>
+              <div class="step-title">Krok 3: Seskupení a sečtení podobných členů</div>
+              <div class="step-desc">Podobné jednočleny (mající stejné písmeno i mocninu) seskupíme k sobě a sečteme jejich koeficienty (případně převedeme zlomky na společného jmenovatele):</div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom:12px; font-size:0.95rem; color:#334155;">
+            Přeuspořádání: <span class="rule-formula">${rearrangedGroupStrings.join(' + ')}</span>
+          </div>
+
+          <div class="groups-grid">
+            ${groupsCardsHtml}
+          </div>
+        </div>
+      `;
+
+      html += `
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-num">${stepCounter++}</div>
+            <div>
+              <div class="step-title">Krok 4: Konečný zjednodušený výsledek</div>
+              <div class="step-desc">Spojíme sečtené skupiny do jednoho zjednodušeného výrazu. Členy řadíme podle abecedy a klesajících mocnin, čísla píšeme nakonec.</div>
+            </div>
+          </div>
+          <div style="font-size:1.45rem; font-family:'Consolas', monospace; font-weight:800; color:var(--orange-dark); padding:12px; background:var(--orange-bg-subtle); border-radius:8px; text-align:center; border:1px solid var(--orange-border-subtle);">
+            ${escapeHtml(sol.finalResult)}
+          </div>
+          ${sol.altResult ? `<div style="text-align:center; margin-top:8px; font-size:0.95rem; color:#475569;">Alternativní správný zápis: <strong>${escapeHtml(sol.altResult)}</strong></div>` : ''}
+        </div>
+      `;
+
+      stepsContainer.innerHTML = html;
+    }
+
+    function renderEquationSolution(sol) {
+      resultTypeBadge.textContent = "Kořen lineární rovnice";
+      finalResultText.textContent = sol.finalResult;
+      finalAltText.style.display = 'none';
+
+      let stepCounter = 1;
+      let html = '';
+
+      if (sol.percentConversions && sol.percentConversions.length > 0) {
+        let conversionsListHtml = sol.percentConversions.map(c => `<li><strong>${escapeHtml(c.conversion)}</strong></li>`).join('');
+        html += `
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num">${stepCounter++}</div>
+              <div>
+                <div class="step-title">Přípravný krok: Převod procent v rovnici</div>
+                <div class="step-desc">Procenta v rovnici převedeme na zlomky nebo desetinná čísla:</div>
+              </div>
+            </div>
+            <div style="background:var(--orange-bg-subtle); border:1px solid var(--orange-border-subtle); padding:12px 16px; border-radius:8px;">
+              <ul style="margin-left: 20px; line-height: 1.8;">
+                ${conversionsListHtml}
+              </ul>
+              <div style="margin-top:8px; font-size:0.9rem; color:#475569;">
+                Rovnice po převodu: <code>${escapeHtml(sol.cleaned)}</code>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (sol.overallLcm > 1) {
+        html += `
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num">${stepCounter++}</div>
+              <div>
+                <div class="step-title">Krok 1: Odstranění zlomků v rovnici</div>
+                <div class="step-desc">Určíme nejmenší společný násobek všech jmenovatelů a celou rovnici jím vynásobíme:</div>
+              </div>
+            </div>
+            <div style="font-size:1.05rem; line-height:1.7; color:#1e293b;">
+              Společný jmenovatel pro zlomky v rovnici: <strong style="color:var(--orange-dark); font-size:1.2rem;">${sol.overallLcm}</strong><br>
+              Obě strany rovnice vynásobíme číslem <strong>${sol.overallLcm}</strong>:<br>
+              <span class="rule-formula">${sol.overallLcm} · (${escapeHtml(sol.leftSideRaw)}) = ${sol.overallLcm} · (${escapeHtml(sol.rightSideRaw)})</span>
+            </div>
+          </div>
+        `;
+      }
+
+      html += `
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-num">${stepCounter++}</div>
+            <div>
+              <div class="step-title">Krok 2: Roznásobení závorek a zjednodušení stran</div>
+              <div class="step-desc">Zjednodušíme levou stranu (L) a pravou stranu (P) rovnice samostatně:</div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div style="background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;">
+              <strong>Levá strana:</strong><br>
+              <code>${escapeHtml(sol.leftSideRaw)}</code> &longrightarrow; <strong>${escapeHtml(sol.leftSol.finalResult)}</strong>
+            </div>
+            <div style="background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0;">
+              <strong>Pravá strana:</strong><br>
+              <code>${escapeHtml(sol.rightSideRaw)}</code> &longrightarrow; <strong>${escapeHtml(sol.rightSol.finalResult)}</strong>
+            </div>
+          </div>
+          <div style="font-size:1.15rem; font-family:'Consolas', monospace; font-weight:700; text-align:center; padding:10px; background:#fff7ed; border-radius:6px; border:1px solid #fed7aa; color:#9a3412;">
+            ${escapeHtml(sol.leftSol.finalResult)} = ${escapeHtml(sol.rightSol.finalResult)}
+          </div>
+        </div>
+      `;
+
+      html += `
+        <div class="step-card">
+          <div class="step-header">
+            <div class="step-num">${stepCounter++}</div>
+            <div>
+              <div class="step-title">Krok 3: Ekvivalentní úpravy rovnice</div>
+              <div class="step-desc">Převedeme všechny členy s neznámou na levou stranu a číselné členy na pravou stranu:</div>
+            </div>
+          </div>
+          <div style="font-size:1.1rem; line-height:1.8; color:#1e293b;">
+            Upravený tvar po sloučení:<br>
+            <span class="rule-formula">${new Term(sol.coeffA, sol.varPart).toSignedString(true)} = ${sol.coeffB.toString()}</span>
+          </div>
+        </div>
+      `;
+
+      if (sol.rootType === 'unique') {
+        html += `
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num">${stepCounter++}</div>
+              <div>
+                <div class="step-title">Krok 4: Výpočet kořene rovnice</div>
+                <div class="step-desc">Obě strany rovnice vydělíme koeficientem u neznámé (${sol.coeffA.toString()}):</div>
+              </div>
+            </div>
+            <div style="font-size:1.45rem; font-family:'Consolas', monospace; font-weight:800; color:var(--orange-dark); padding:12px; background:var(--orange-bg-subtle); border-radius:8px; text-align:center; border:1px solid var(--orange-border-subtle);">
+              ${escapeHtml(sol.finalResult)}
+            </div>
+          </div>
+        `;
+
+        if (sol.verification) {
+          html += `
+            <div class="step-card">
+              <div class="step-header">
+                <div class="step-num">${stepCounter++}</div>
+                <div>
+                  <div class="step-title">Krok 5: Zkouška správnosti (dosazení kořene)</div>
+                  <div class="step-desc">Ověříme, že hodnota levé strany se rovná hodnotě pravé strany po dosazení ${sol.varPart} = ${sol.root.toString()}:</div>
+                </div>
+              </div>
+              <div style="background:#f8fafc; padding:14px; border-radius:8px; border:1px solid #e2e8f0; font-family:'Consolas', monospace; font-size:1.05rem;">
+                <div>L(${sol.varPart}) = <strong>${escapeHtml(sol.verification.leftValue)}</strong></div>
+                <div>P(${sol.varPart}) = <strong>${escapeHtml(sol.verification.rightValue)}</strong></div>
+                <div style="margin-top:8px; color:var(--success); font-weight:700;">
+                  ✔ L = P (Zkouška vyšla, řešení je správné!)
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        html += `
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-num">${stepCounter++}</div>
+              <div>
+                <div class="step-title">Závěr řešení rovnice</div>
+              </div>
+            </div>
+            <div style="font-size:1.3rem; font-weight:700; color:var(--danger); padding:12px; background:var(--danger-bg); border-radius:8px; text-align:center;">
+              ${escapeHtml(sol.finalResult)}
+            </div>
+          </div>
+        `;
+      }
+
+      stepsContainer.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+    }
+
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorAlert.classList.add('visible');
+    }
+
+    function hideError() {
+      errorAlert.classList.remove('visible');
+    }
+
+    function generateRandomProblem() {
+      const vars = ['x', 'a', 'y'];
+      const v = vars[Math.floor(Math.random() * vars.length)];
+      
+      const templates = [
+        () => {
+          const c1 = Math.floor(Math.random() * 8) + 2;
+          const c2 = Math.floor(Math.random() * 6) + 1;
+          const c3 = Math.floor(Math.random() * 8) + 1;
+          const c4 = Math.floor(Math.random() * 5) + 1;
+          const c5 = Math.floor(Math.random() * 7) + 1;
+          return `${c1} - (${c2}${v} - ${c3}) + (${c4}${v} + ${c5})`;
+        },
+        () => `1/2${v} + 3/4${v} - 5`,
+        () => {
+          const p = [10, 15, 20, 25, 30][Math.floor(Math.random() * 5)];
+          const c = Math.floor(Math.random() * 30) + 10;
+          return `${p}% z ${v} + ${c}`;
+        },
+        () => {
+          const p = [10, 20, 25, 50][Math.floor(Math.random() * 4)];
+          return `${v} + ${p}% - 15`;
+        },
+        () => {
+          const a = Math.floor(Math.random() * 4) + 2;
+          const b = Math.floor(Math.random() * 8) + 1;
+          const c = Math.floor(Math.random() * 3) + 1;
+          const d = Math.floor(Math.random() * 10) + 2;
+          return `${a}${v} - ${b} = ${c}${v} + ${d}`;
+        },
+        () => `(2${v} - 1)/3 = (${v} + 4)/2`,
+        () => `${v} + 20% = 60`
+      ];
+
+      const chosen = templates[Math.floor(Math.random() * templates.length)]();
+      exprInput.value = chosen;
+      handleSolve();
+    }
+
+    function verifyStudentAnswer() {
+      const studentRaw = practiceInput.value.trim();
+      if (!studentRaw) {
+        practiceFeedback.textContent = "Prosím zadej svůj výsledek.";
+        practiceFeedback.className = "practice-feedback incorrect";
+        return;
+      }
+
+      if (!currentSolution) {
+        handleSolve();
+      }
+
+      try {
+        const studentSol = solveGeneral(studentRaw);
+        const correctSol = currentSolution;
+
+        const sRes = studentSol.finalResult.replace(/\s+/g, '');
+        const cRes = correctSol.finalResult.replace(/\s+/g, '');
+        const aRes = correctSol.altResult ? correctSol.altResult.replace(/\s+/g, '') : null;
+
+        let isMatch = (sRes === cRes) || (aRes && sRes === aRes);
+
+        if (!isMatch && !correctSol.isEquation && !studentSol.isEquation) {
+          try {
+            const diff = solveGeneral(`(${studentRaw}) - (${correctSol.cleaned})`);
+            if (diff.finalResult === '0') isMatch = true;
+          } catch(e) {}
+        }
+
+        if (isMatch) {
+          practiceFeedback.innerHTML = `🎉 <strong>VÝBORNĚ!</strong> Tvůj výsledek <code>${escapeHtml(studentRaw)}</code> je naprosto správný! Skvělá práce!`;
+          practiceFeedback.className = "practice-feedback correct";
+        } else {
+          practiceFeedback.innerHTML = `❌ <strong>Téměř, ale ještě to není úplně ono.</strong><br>Tvůj výsledek: <code>${escapeHtml(studentSol.finalResult)}</code><br>Správný výsledek: <code>${escapeHtml(correctSol.finalResult)}</code>.<br>Podívej se níže na podrobný postup řešení.`;
+          practiceFeedback.className = "practice-feedback incorrect";
+        }
+      } catch (err) {
+        practiceFeedback.textContent = "Chyba při čtení zápisu: " + err.message;
+        practiceFeedback.className = "practice-feedback incorrect";
+      }
+    }
+
+    solveBtn.addEventListener('click', handleSolve);
+    exprInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSolve();
+    });
+    randomBtn.addEventListener('click', generateRandomProblem);
+
+    clearBtn.addEventListener('click', () => {
+      exprInput.value = '';
+      exprInput.focus();
+    });
+
+    backspaceBtn.addEventListener('click', () => {
+      const val = exprInput.value;
+      if (val.length > 0) exprInput.value = val.slice(0, -1);
+      exprInput.focus();
+    });
+
+    document.querySelectorAll('.key-btn[data-insert]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.getAttribute('data-insert');
+        const start = exprInput.selectionStart || exprInput.value.length;
+        const end = exprInput.selectionEnd || exprInput.value.length;
+        const val = exprInput.value;
+        exprInput.value = val.substring(0, start) + text + val.substring(end);
+        exprInput.focus();
+        exprInput.setSelectionRange(start + text.length, start + text.length);
+      });
+    });
+
+    document.querySelectorAll('.preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        exprInput.value = chip.getAttribute('data-expr');
+        handleSolve();
+      });
+    });
+
+    cheatsheetToggle.addEventListener('click', () => {
+      const isOpen = cheatsheetBody.classList.contains('open');
+      if (isOpen) {
+        cheatsheetBody.classList.remove('open');
+        cheatsheetIcon.textContent = '▼';
+      } else {
+        cheatsheetBody.classList.add('open');
+        cheatsheetIcon.textContent = '▲';
+      }
+    });
+
+    practiceToggleBtn.addEventListener('click', () => {
+      practiceBox.classList.toggle('active');
+      if (practiceBox.classList.contains('active')) {
+        practiceInput.focus();
+      }
+    });
+
+    checkPracticeBtn.addEventListener('click', verifyStudentAnswer);
+    practiceInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyStudentAnswer();
+    });
+
+    copyResultBtn.addEventListener('click', () => {
+      if (currentSolution) {
+        navigator.clipboard.writeText(currentSolution.finalResult).then(() => {
+          const originalText = copyResultBtn.innerHTML;
+          copyResultBtn.innerHTML = '<span>✅ Zkopírováno!</span>';
+          setTimeout(() => {
+            copyResultBtn.innerHTML = originalText;
+          }, 1800);
+        });
+      }
+    });
+
+    printCalcBtn.addEventListener('click', () => {
+      if (!currentSolution) handleSolve();
+      window.print();
+    });
+
+    // Startup
+    loadHistory();
+    handleSolve();
+
+  </script>
+</body>
+</html>
